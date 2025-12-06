@@ -29,6 +29,7 @@ const sidebar = document.querySelector('.sidebar');
 
 // State
 let currentUser = null;
+let currentPassword = null;
 let activeChat = null;
 let users = new Map();
 let messageHistory = new Map();
@@ -104,6 +105,7 @@ function handleLogin() {
     }
 
     currentUser = username;
+    currentPassword = password; // Store for reconnection
     socket.emit('user:login', { username, password });
 }
 
@@ -118,6 +120,7 @@ socket.on('login:success', ({ username }) => {
 socket.on('login:error', ({ message }) => {
     alert(message);
     currentUser = null;
+    currentPassword = null;
 });
 
 // Socket Event Handlers
@@ -746,13 +749,21 @@ document.addEventListener('click', (e) => {
 // Connection Status
 socket.on('connect', () => {
     console.log('✅ Connected to server');
+    if (currentUser && currentPassword) {
+        console.log('🔄 Auto-reconnecting...');
+        socket.emit('user:login', { username: currentUser, password: currentPassword });
+    }
 });
 
 socket.on('disconnect', () => {
     console.log('❌ Disconnected from server');
+    // Optional: Show disconnection UI
 });
 
 socket.on('error', (error) => {
     console.error('Socket error:', error);
-    alert(error.message || 'An error occurred');
+    // Don't alert on simple disconnects/reconnects to avoid spam
+    if (error.message !== 'xhr poll error') {
+        console.warn(error.message);
+    }
 });
