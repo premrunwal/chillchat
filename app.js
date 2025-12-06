@@ -24,6 +24,8 @@ const emojiPicker = document.getElementById('emoji-picker');
 const typingIndicator = document.getElementById('typing-indicator');
 const fileBtn = document.getElementById('file-btn');
 const fileInput = document.getElementById('file-input');
+const mobileBackBtn = document.getElementById('mobile-back-btn');
+const sidebar = document.querySelector('.sidebar');
 
 // State
 let currentUser = null;
@@ -503,7 +505,36 @@ function openChat(user) {
     socket.emit('messages:history', { userId: user.userId });
     renderContacts();
     messageInput.focus();
+
+    // Mobile: Hide sidebar and show back button
+    if (window.innerWidth <= 768) {
+        sidebar.classList.add('hidden-mobile');
+        mobileBackBtn.style.display = 'flex';
+    }
 }
+
+// Mobile back button handler
+if (mobileBackBtn) {
+    mobileBackBtn.addEventListener('click', () => {
+        sidebar.classList.remove('hidden-mobile');
+        chatWindow.classList.add('hidden');
+        emptyState.classList.remove('hidden');
+        mobileBackBtn.style.display = 'none';
+        activeChat = null;
+    });
+}
+
+// Handle window resize
+window.addEventListener('resize', () => {
+    if (window.innerWidth > 768) {
+        sidebar.classList.remove('hidden-mobile');
+        mobileBackBtn.style.display = 'none';
+        if (activeChat) {
+            chatWindow.classList.remove('hidden');
+            emptyState.classList.add('hidden');
+        }
+    }
+});
 
 function updateChatStatus(online) {
     chatStatus.textContent = online ? 'Online' : 'Offline';
