@@ -69,6 +69,7 @@ function formatFileSize(bytes) {
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
 }
 
 function generateTransferId() {
@@ -76,28 +77,48 @@ function generateTransferId() {
 }
 
 // Authentication
+const passwordInput = document.getElementById('password-input');
+
 loginBtn.addEventListener('click', handleLogin);
 usernameInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') handleLogin();
 });
+if (passwordInput) {
+    passwordInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') handleLogin();
+    });
+}
 
 function handleLogin() {
     const username = usernameInput.value.trim();
+    const password = passwordInput ? passwordInput.value.trim() : '';
 
     if (username.length < 2) {
         alert('Username must be at least 2 characters');
         return;
     }
 
-    currentUser = username;
-    socket.emit('user:login', { username });
+    if (passwordInput && password.length < 4) {
+        alert('Password must be at least 4 characters');
+        return;
+    }
 
+    currentUser = username;
+    socket.emit('user:login', { username, password });
+}
+
+socket.on('login:success', ({ username }) => {
     authScreen.classList.add('hidden');
     chatApp.classList.remove('hidden');
     currentUsername.textContent = username;
     currentUserInitial.textContent = getInitial(username);
     currentUserAvatar.style.background = getAvatarColor(username);
-}
+});
+
+socket.on('login:error', ({ message }) => {
+    alert(message);
+    currentUser = null;
+});
 
 // Socket Event Handlers
 socket.on('users:list', (usersList) => {
@@ -116,18 +137,6 @@ socket.on('user:online', ({ userId, username, online }) => {
         renderContacts();
         if (activeChat === userId) {
             updateChatStatus(online);
-        }
-    }
-});
-
-socket.on('user:offline', ({ userId, username, lastSeen }) => {
-    const user = users.get(userId);
-    if (user) {
-        user.online = false;
-        user.lastSeen = lastSeen;
-        renderContacts();
-        if (activeChat === userId) {
-            updateChatStatus(false);
         }
     }
 });

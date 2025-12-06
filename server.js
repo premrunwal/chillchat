@@ -27,20 +27,39 @@ io.on('connection', (socket) => {
     console.log('New client connected:', socket.id);
 
     // User registration/login
-    socket.on('user:login', ({ username }) => {
+    socket.on('user:login', ({ username, password }) => {
         const userId = username.toLowerCase();
+        const existingUser = users.get(userId);
 
-        users.set(userId, {
-            username,
-            socketId: socket.id,
-            online: true,
-            lastSeen: new Date()
-        });
+        if (existingUser) {
+            // Verify password
+            if (existingUser.password !== password) {
+                socket.emit('login:error', { message: 'Incorrect password' });
+                return;
+            }
+            
+            // Update connection info
+            existingUser.socketId = socket.id;
+            existingUser.online = true;
+            existingUser.lastSeen = new Date();
+            users.set(userId, existingUser);
+        } else {
+            // Register new user
+            users.set(userId, {
+                username,
+                password, // Store password (in-memory only)
+                socketId: socket.id,
+                online: true,
+                lastSeen: new Date()
+            });
+        }
 
         socket.userId = userId;
         socket.username = username;
 
-        // Send existing users list
+        // Send success and existing users list
+        socket.emit('login:success', { username });
+
         const usersList = Array.from(users.entries()).map(([id, user]) => ({
             userId: id,
             username: user.username,
