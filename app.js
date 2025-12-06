@@ -235,12 +235,21 @@ socket.on('file:complete', ({ transferId }) => {
     const transfer = pendingTransfers.get(transferId);
     if (transfer && transfer.chunks) {
         // Reassemble the file from chunks
-        const sortedChunks = [];
+        const chunks = [];
         for (let i = 0; i < transfer.totalChunks; i++) {
-            sortedChunks.push(transfer.chunks.get(i) || '');
+            const base64 = transfer.chunks.get(i) || '';
+            const binary = atob(base64);
+            const len = binary.length;
+            const buffer = new Uint8Array(len);
+            for (let j = 0; j < len; j++) {
+                buffer[j] = binary.charCodeAt(j);
+            }
+            chunks.push(buffer);
         }
-        const base64Data = sortedChunks.join('');
-        const dataUrl = `data:${transfer.metadata.type};base64,${base64Data}`;
+
+        // Create Blob URL (much more reliable for large files/mobile)
+        const blob = new Blob(chunks, { type: transfer.metadata.type });
+        const dataUrl = URL.createObjectURL(blob);
 
         // Create file data object
         const fileData = {
