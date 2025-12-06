@@ -599,6 +599,57 @@ body {
     border-radius: 3px;
     margin-top: var(--spacing-xs);
     overflow: hidden;
+    margin-top: var(--spacing-xs);
+    overflow: hidden;
+}
+
+/* New File Preview & Download UI */
+.file-preview-container {
+    position: relative;
+    max-width: 100%;
+}
+
+.file-download-btn {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+    backdrop-filter: blur(4px);
+    opacity: 0.8;
+    text-decoration: none;
+    z-index: 10;
+}
+
+.file-download-btn:hover {
+    background: rgba(0, 0, 0, 0.8);
+    transform: scale(1.1);
+    opacity: 1;
+}
+
+.video-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 4px 0 4px;
+    font-size: 0.85rem;
+}
+
+.file-download-link {
+    color: var(--primary-light);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.file-download-link:hover {
+    text-decoration: underline;
 }
 
 .progress-fill {
