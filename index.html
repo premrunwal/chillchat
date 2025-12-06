@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Modern real-time chat application with WhatsApp-style interface">
+    <title>ChillChat - Real-Time Messaging</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <!-- Authentication Screen -->
+    <div id="auth-screen" class="auth-screen">
+        <div class="auth-container">
+            <div class="auth-header">
+                <div class="logo">
+                    <svg width="60" height="60" viewBox="0 0 60 60" fill="none">
+                        <circle cx="30" cy="30" r="28" fill="url(#gradient1)" />
+                        <path d="M20 30 L28 38 L42 22" stroke="white" stroke-width="4" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                        <defs>
+                            <linearGradient id="gradient1" x1="0" y1="0" x2="60" y2="60">
+                                <stop offset="0%" stop-color="#667eea" />
+                                <stop offset="100%" stop-color="#764ba2" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <h1>ChillChat</h1>
+                <p>Connect instantly with anyone, anywhere</p>
+            </div>
+            <div class="auth-form">
+                <input type="text" id="username-input" placeholder="Enter your username" autocomplete="off"
+                    maxlength="20" />
+                <button id="login-btn" class="btn-primary">
+                    <span>Start Chatting</span>
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M4 10h12m0 0l-4-4m4 4l-4 4" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Chat Application -->
+    <div id="chat-app" class="chat-app hidden">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="user-profile">
+                    <div class="avatar" id="current-user-avatar">
+                        <span id="current-user-initial">U</span>
+                    </div>
+                    <div class="user-info">
+                        <h3 id="current-username">User</h3>
+                        <span class="status online">Online</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="search-container">
+                <input type="text" id="search-users" placeholder="Search users..." autocomplete="off" />
+            </div>
+
+            <div class="contacts-list" id="contacts-list">
+                <!-- Contacts will be dynamically added here -->
+            </div>
+        </aside>
+
+        <!-- Chat Area -->
+        <main class="chat-main">
+            <!-- Empty State -->
+            <div id="empty-state" class="empty-state">
+                <div class="empty-state-content">
+                    <svg width="120" height="120" viewBox="0 0 120 120" fill="none">
+                        <circle cx="60" cy="60" r="50" fill="url(#gradient2)" opacity="0.2" />
+                        <path d="M40 50h40M40 60h30M40 70h35" stroke="url(#gradient2)" stroke-width="4"
+                            stroke-linecap="round" />
+                        <defs>
+                            <linearGradient id="gradient2" x1="0" y1="0" x2="120" y2="120">
+                                <stop offset="0%" stop-color="#667eea" />
+                                <stop offset="100%" stop-color="#764ba2" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                    <h2>Welcome to ChillChat</h2>
+                    <p>Select a contact to start chatting</p>
+                </div>
+            </div>
+
+            <!-- Chat Window -->
+            <div id="chat-window" class="chat-window hidden">
+                <div class="chat-header">
+                    <div class="chat-user-info">
+                        <div class="avatar" id="chat-user-avatar">
+                            <span id="chat-user-initial">U</span>
+                        </div>
+                        <div>
+                            <h3 id="chat-username">User</h3>
+                            <span class="chat-status" id="chat-status">Online</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="messages-container" id="messages-container">
+                    <!-- Messages will be dynamically added here -->
+                </div>
+
+                <div class="typing-indicator hidden" id="typing-indicator">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+
+                <div class="message-input-container">
+                    <button class="icon-btn" id="file-btn" title="Attach File">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path
+                                d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </button>
+                    <input type="file" id="file-input" style="display: none;" />
+                    <button class="icon-btn" id="emoji-btn" title="Emoji">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
+                            <circle cx="9" cy="10" r="1.5" fill="currentColor" />
+                            <circle cx="15" cy="10" r="1.5" fill="currentColor" />
+                            <path d="M8 14s1.5 2 4 2 4-2 4-2" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" />
+                        </svg>
+                    </button>
+                    <input type="text" id="message-input" placeholder="Type a message..." autocomplete="off" />
+                    <button class="icon-btn send-btn" id="send-btn" title="Send">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Emoji Picker -->
+    <div id="emoji-picker" class="emoji-picker hidden">
+        <div class="emoji-grid">
+            😀 😃 😄 😁 😆 😅 🤣 😂 🙂 🙃 😉 😊 😇 🥰 😍 🤩 😘 😗 😚 😙
+            🥲 😋 😛 😜 🤪 😝 🤑 🤗 🤭 🤫 🤔 🤐 🤨 😐 😑 😶 😏 😒 🙄 😬
+            🤥 😌 😔 😪 🤤 😴 😷 🤒 🤕 🤢 🤮 🤧 🥵 🥶 😶‍🌫️ 😵 🤯 🤠 🥳 🥸
+            👍 👎 👌 🤌 🤏 ✌️ 🤞 🤟 🤘 🤙 👈 👉 👆 👇 ☝️ 👋 🤚 🖐 ✋ 🖖
+            ❤️ 🧡 💛 💚 💙 💜 🖤 🤍 🤎 💔 ❣️ 💕 💞 💓 💗 💖 💘 💝 🔥 ✨
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>
