@@ -626,14 +626,27 @@ function displayMessage(messageData, type) {
         const isVideo = mimetype && mimetype.startsWith('video/');
 
         if (isImage && dataUrl) {
-            messageContent = `<img src="${dataUrl}" alt="${originalname}" class="file-preview" onclick="window.open('${dataUrl}', '_blank')" />`;
+            messageContent = `
+                <div class="file-preview-container">
+                    <img src="${dataUrl}" alt="${originalname}" class="file-preview" />
+                    <a href="${dataUrl}" download="${originalname}" class="file-download-btn" title="Download Image">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+                        </svg>
+                    </a>
+                </div>`;
         } else if (isVideo && dataUrl) {
             messageContent = `
-                <video controls class="file-preview">
-                    <source src="${dataUrl}" type="${mimetype}">
-                    Your browser does not support the video tag.
-                </video>
-                <div style="margin-top: 8px; font-size: 0.85rem; opacity: 0.8;">${escapeHtml(originalname)} (${formatFileSize(size)})</div>
+                <div class="file-preview-container">
+                    <video controls class="file-preview">
+                        <source src="${dataUrl}" type="${mimetype}">
+                        Your browser does not support the video tag.
+                    </video>
+                    <div class="video-info">
+                        <span class="file-name">${escapeHtml(originalname)}</span>
+                        <a href="${dataUrl}" download="${originalname}" class="file-download-link">Download (${formatFileSize(size)})</a>
+                    </div>
+                </div>
             `;
         } else if (dataUrl) {
             messageContent = `
@@ -648,7 +661,11 @@ function displayMessage(messageData, type) {
                         <div class="file-name">${escapeHtml(originalname)}</div>
                         <div class="file-size">${formatFileSize(size)}</div>
                     </div>
-                    <a href="${dataUrl}" download="${originalname}" class="file-download">Download</a>
+                    <a href="${dataUrl}" download="${originalname}" class="file-download">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+                        </svg>
+                    </a>
                 </div>
             `;
         }

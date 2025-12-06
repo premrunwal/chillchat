@@ -590,25 +590,6 @@ body {
 .file-transfer-progress {
     display: flex;
     align-items: center;
-    gap: var(--spacing-md);
-    padding: var(--spacing-sm);
-    min-width: 250px;
-}
-
-.file-transfer-progress .file-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: var(--radius-sm);
-    background: var(--bg-tertiary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.file-transfer-progress .file-info {
-    flex: 1;
-    min-width: 0;
 }
 
 .progress-bar {
