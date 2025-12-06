@@ -135,11 +135,11 @@ io.on('connection', (socket) => {
         }
     });
 
-    // Receive file chunk
-    socket.on('file:chunk', ({ transferId, chunkIndex, chunk, isLast }) => {
+    // Receive file chunk with flow control
+    socket.on('file:chunk', ({ transferId, chunkIndex, chunk, isLast }, callback) => {
         const transfer = fileTransfers.get(transferId);
         if (!transfer) {
-            socket.emit('error', { message: 'Transfer not found' });
+            if (callback) callback({ error: 'Transfer not found' });
             return;
         }
 
@@ -169,6 +169,9 @@ io.on('connection', (socket) => {
                 progress
             });
         }
+
+        // Acknowledgement for flow control
+        if (callback) callback({ success: true });
 
         if (isLast) {
             console.log(`✅ File transfer completed: ${transfer.metadata.name}`);

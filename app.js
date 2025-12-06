@@ -36,7 +36,7 @@ let typingTimeout = null;
 
 // File transfer state
 const pendingTransfers = new Map(); // transferId -> { chunks: Map, metadata: {} }
-const CHUNK_SIZE = 64 * 1024; // 64KB chunks
+const CHUNK_SIZE = 512 * 1024; // 512KB chunks for better stability
 
 // Utility Functions
 function getInitial(username) {
@@ -440,16 +440,37 @@ async function sendFileChunks(transferId, file) {
             reader.readAsDataURL(chunk);
         });
 
-        // Send chunk
-        socket.emit('file:chunk', {
-            transferId,
-            chunkIndex: i,
-            chunk: base64Chunk,
-            isLast: i === totalChunks - 1
-        });
+        // Send chunk and wait for acknowledgment
+        try {
+            await new Promise((resolve, reject) => {
+                const timeout = setTimeout(() => {
+                    console.warn('⚠️ Chunk ack timeout - proceeding anyway');
+                    resolve();
+                }, 5000); // 5s timeout
 
-        // Small delay to prevent overwhelming the socket
-        await new Promise(resolve => setTimeout(resolve, 10));
+                socket.emit('file:chunk', {
+                    transferId,
+                    chunkIndex: i,
+                    chunk: base64Chunk,
+                    isLast: i === totalChunks - 1
+                }, (response) => {
+                    clearTimeout(timeout);
+                    if (response && response.error) {
+                        reject(new Error(response.error));
+                    } else {
+                        resolve();
+                    }
+                });
+            });
+        } catch (error) {
+            console.error('File transfer error:', error);
+            alert(`Transfer failed: ${error.message}`);
+            pendingTransfers.delete(transferId);
+            return;
+        }
+
+        // Small delay to let UI breathe
+        await new Promise(resolve => setTimeout(resolve, 5));
     }
 
     // Clean up local reference
