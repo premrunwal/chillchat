@@ -421,7 +421,7 @@ async function sendFileChunked(file) {
     };
 
     // Store file reference for when server is ready
-    pendingTransfers.set(transferId, { file, metadata });
+    pendingTransfers.set(transferId, { file, metadata, to: activeChat });
 
     // Show progress UI
     showSendingFileProgress(transferId, file);
@@ -475,6 +475,23 @@ async function sendFileChunks(transferId, file) {
                 });
             });
         } catch (error) {
+            // Handle "Transfer not found" (server restart/timeout) -> Auto-recover
+            if (error.message.includes('Transfer not found')) {
+                console.warn('⚠️ Server lost transfer state. Attempting to recover...');
+                const transferData = pendingTransfers.get(transferId);
+
+                if (transferData) {
+                    // Re-initialize transfer on server
+                    socket.emit('file:start', {
+                        transferId,
+                        metadata: transferData.metadata,
+                        to: transferData.to
+                    });
+                    // Exit this loop - the 'file:ready' event will trigger a NEW loop
+                    return;
+                }
+            }
+
             console.error('File transfer error:', error);
             alert(`Transfer failed: ${error.message}`);
             pendingTransfers.delete(transferId);
